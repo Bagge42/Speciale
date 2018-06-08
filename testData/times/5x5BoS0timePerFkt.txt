@@ -1,0 +1,20 @@
+Fri Jun  1 20:58:19 2018    out.txt
+
+         4319284 function calls (4319232 primitive calls) in 3.903 seconds
+
+   Ordered by: internal time
+   List reduced from 247 to 10 due to restriction <10>
+
+   ncalls  tottime  cumtime  filename:lineno(function)
+  1280138    1.974    2.345  C:\Anaconda3\lib\fractions.py:84(__new__)
+     8312    1.037    3.382  C:\speciale3.py:95(<listcomp>)
+  1280138    0.202    0.202  {built-in method math.gcd}
+      109    0.197    0.198  C:\speciale3.py:163(LemkePivoting)
+  1280138    0.169    0.169  {built-in method __new__ of type object at 0x00000000703BB620}
+    76920    0.055    0.120  C:\Anaconda3\lib\fractions.py:567(__eq__)
+      108    0.049    3.637  C:\speciale3.py:88(findEnteringRow)
+        1    0.031    3.866  C:\speciale3.py:104(LemkeMain)
+    68615    0.028    0.050  C:\Anaconda3\lib\abc.py:178(__instancecheck__)
+    68930    0.026    0.077  {built-in method builtins.isinstance}
+
+
