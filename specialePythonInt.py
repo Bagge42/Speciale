@@ -327,8 +327,8 @@ def zeroOrNegInMatrix(M):
 
 
 def findEquilibrium(A,B):
-    A          = A.astype(int)
-    B          = B.astype(int)
+    A             = A.astype(int)
+    B             = B.astype(int)
     print('Matrix A:\n', A, '\nMatrix B:\n', B)
     A             = zeroOrNegInMatrix(A)
     B             = zeroOrNegInMatrix(B)
