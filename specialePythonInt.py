@@ -38,11 +38,11 @@ class SystemInfo:
     avb      = np.array([])
 
     def __init__(self, M, b):
-        self.B   = np.arange(len(M)).astype(np.int64)
-        self.I   = np.identity(len(M)).astype(np.int64)
+        self.B   = np.arange(len(M),dtype=object)
+        self.I   = np.identity(len(M),dtype=object)
         self.M   = M
         self.b   = b
-        self.avb = np.concatenate((self.I, -np.ones((1,len(M))).astype(np.int64).T, -M, b, self.I), axis=1)
+        self.avb = np.concatenate((self.I, -np.ones((1,len(M)),dtype=object).T, -M, b, self.I), axis=1)
 
     def getColumnsFrombAndEpsilon(self):
         return self.avb[:, -len(self.I)-len(self.b[0]):-1]
@@ -53,7 +53,7 @@ class SystemInfo:
     def prep(self):
         b1        = self.avb[:,-len(self.I)-len(self.b[0]):]
         v         = np.zeros([2*len(self.I)+1,b1.shape[1]])
-        v[self.B] = b1
+        v[self.B.astype(np.int)] = b1
         return v
 
     def getw(self):
@@ -105,7 +105,7 @@ def LemkeMain(M,b):
 
     while(True):
         LemkePivoting(system1)
-    
+        
         #leftBase == lengthOfI if z0 is leaving variable.
         if(system1.leftBase == len(system1.I)):
             return system1
@@ -117,33 +117,33 @@ def LemkeMain(M,b):
         
         winner = findEnteringRow(system1)
 
-        system1.eRow   = winner[-1]
-        system1.eValue = system1.avb[int(system1.eRow)][int(system1.eColumn)]
+        system1.eRow   = int(winner[-1])
+        system1.eValue = int(system1.avb[int(system1.eRow)][int(system1.eColumn)])
 
                 
 def LemkePivoting(SystemInfo):
     for i in range(len(SystemInfo.avb)):
         if(i != SystemInfo.eRow):
             #The value of the pivot element is multiplied on row i != pivotrow.
-            SystemInfo.avb[i]   = SystemInfo.eValue*SystemInfo.avb[i]
+            SystemInfo.avb[i]   = int(SystemInfo.eValue)*SystemInfo.avb[i]
             
             #Ratio between the element of same column as the pivot element in row i and the pivot element.
-            ratio               = SystemInfo.avb[i][int(SystemInfo.eColumn)]//SystemInfo.eValue
+            ratio               = int(SystemInfo.avb[i][int(SystemInfo.eColumn)]//SystemInfo.eValue)
             
             #Subtract an integer multipla of the pivotrow from row i.
             SystemInfo.avb[i]  -= ratio*SystemInfo.avb[int(SystemInfo.eRow)]
             
             #Divide with previous pivot.
-            SystemInfo.avb[i] //= SystemInfo.pev
+            SystemInfo.avb[i] //= int(SystemInfo.pev)
             
     #Update determinant and previous pivot.
-    SystemInfo.detB  *= SystemInfo.eValue
-    SystemInfo.detB //= SystemInfo.pev
-    SystemInfo.pev    = SystemInfo.eValue
+    SystemInfo.detB  *= int(SystemInfo.eValue)
+    SystemInfo.detB //= int(SystemInfo.pev)
+    SystemInfo.pev    = int(SystemInfo.eValue)
     
     #Update the base after each pivot and save the old base to find complement.
-    SystemInfo.leftBase                = SystemInfo.B[int(SystemInfo.eRow)]
-    SystemInfo.B[int(SystemInfo.eRow)] = SystemInfo.eColumn
+    SystemInfo.leftBase                = int(SystemInfo.B[int(SystemInfo.eRow)])
+    SystemInfo.B[int(SystemInfo.eRow)] = int(SystemInfo.eColumn)
     
     return SystemInfo
 
@@ -195,9 +195,9 @@ def makeVariableTable(nrOfVar):
     
 def setupMatrices(network, varNr):
     rowsInE = len(network) + varNr
-    G       = np.zeros((len(network)*2,len(network)*2+varNr)).astype(np.int64)
-    E       = np.zeros((rowsInE,len(network)*2+varNr)).astype(np.int64)
-    e       = np.zeros((rowsInE, varNr)).astype(np.int64)
+    G       = np.zeros((len(network)*2,len(network)*2+varNr),dtype=object)
+    E       = np.zeros((rowsInE,len(network)*2+varNr),dtype=object)
+    e       = np.zeros((rowsInE, varNr),dtype=object)
     return makeConstraints(varNr, G, E, e, network)
 
 def makeConstraints(nrOfVar, matrixG, matrixE, matrixe, sortingNetwork):
@@ -241,9 +241,9 @@ def makeConstraints(nrOfVar, matrixG, matrixE, matrixe, sortingNetwork):
 #Part IV: More conversion.
 def makeMAndbMatrices(A, B, E, F, G, H, e, f):
     #Matrices A and B are padded with zeroes to fit inside their respective cells.
-    paddedB                            = np.zeros((len(F.T), len(G[0]))).astype(np.int64)
+    paddedB                            = np.zeros((len(F.T), len(G[0])),dtype=object)
     paddedB[0:len(B.T), 0:len(B.T[0])] = -B.T
-    paddedA                            = np.zeros((len(G.T), len(F[0]))).astype(np.int64)
+    paddedA                            = np.zeros((len(G.T), len(F[0])),dtype=object)
     paddedA[0:len(A), 0:len(A[0])]     = -A
     
     #Making b
@@ -252,7 +252,7 @@ def makeMAndbMatrices(A, B, E, F, G, H, e, f):
         if(len(e[0]) > len(f[0])):
             smallerOne = f
         difference       = np.absolute(len(e[0]) - len(f[0]))
-        differenceZeroes = np.zeros((len(smallerOne), difference)).astype(np.int64)
+        differenceZeroes = np.zeros((len(smallerOne), difference),dtype=object)
         smallerOne       = np.concatenate((smallerOne, differenceZeroes), axis=1)
         if(len(e) > len(f)):
             f = smallerOne
@@ -260,31 +260,32 @@ def makeMAndbMatrices(A, B, E, F, G, H, e, f):
             e = smallerOne
         
     columnsOfb = np.maximum(len(e[0]), len(f[0]))
-    b1         = np.zeros((len(paddedA) + len(paddedB), columnsOfb)).astype(np.int64)
-    b2         = np.zeros((len(G), columnsOfb)).astype(np.int64)
-    b3         = np.zeros((len(H), columnsOfb)).astype(np.int64)
+    b1         = np.zeros((len(paddedA) + len(paddedB), columnsOfb),dtype=object)
+    b2         = np.zeros((len(G), columnsOfb),dtype=object)
+    b3         = np.zeros((len(H), columnsOfb),dtype=object)
     b          = np.vstack((b1, e, -e, b2, f, -f, b3))
 
+    
     #Making M
     #E and G have the same number of columns. The number of rows in M11 is dependant on the number of rows in E^T/G^T,
     #which is the number of columns in E/G. The number of columns in M11 are dependant on the number of columns in E/G.
-    M11        = np.zeros((len(G.T), len(G[0]))).astype(np.int64)
-    M61        = np.zeros((2*len(F)+len(H),len(G[0]))).astype(np.int64)
+    M11        = np.zeros((len(G.T), len(G[0])),dtype=object)
+    M61        = np.zeros((2*len(F)+len(H),len(G[0])),dtype=object)
     
     #Rows and columns are created one by one to merge later.
     columnOne  = np.vstack((M11,paddedB, -E, E, -G, M61))
     
-    M22To52    = np.zeros((len(paddedB)+2*len(E)+len(G), len(F[0]))).astype(np.int64)
+    M22To52    = np.zeros((len(paddedB)+2*len(E)+len(G), len(F[0])),dtype=object)
     columnTwo  = np.vstack((paddedA, M22To52, -F, F, -H))
 
-    M16        = np.zeros((len(G.T), 2*len(F.T[0])+len(H.T[0]))).astype(np.int64)
+    M16        = np.zeros((len(G.T), 2*len(F.T[0])+len(H.T[0])),dtype=object)
     rowOne     = np.concatenate((E.T, -E.T, G.T, M16), axis=1)
     
-    M22To25    = np.zeros((len(F.T), 2*len(E.T[0])+len(G.T[0]))).astype(np.int64)
+    M22To25    = np.zeros((len(F.T), 2*len(E.T[0])+len(G.T[0])),dtype=object)
     rowTwo     = np.concatenate((M22To25, F.T, -F.T, H.T), axis=1)
     
     dimOfRest  = 2*len(E)+2*len(F)+len(G)+len(H)
-    MRest      = np.zeros((dimOfRest, dimOfRest)).astype(np.int64)
+    MRest      = np.zeros((dimOfRest, dimOfRest),dtype=object)
     
     #Putting the pieces together
     lastColumn = np.vstack((rowOne, rowTwo, MRest))
@@ -297,6 +298,8 @@ def makeMatrixNeg(M):
 
 #Part V: Put the pieces together.
 def findProperEquilibrium(A,B):
+    A          = A.astype(int)
+    B          = B.astype(int)
     print('Matrix A:\n', A, '\nMatrix B:\n', B)
     A          = makeMatrixNeg(A)
     B          = makeMatrixNeg(B)
@@ -324,12 +327,14 @@ def zeroOrNegInMatrix(M):
 
 
 def findEquilibrium(A,B):
+    A          = A.astype(int)
+    B          = B.astype(int)
     print('Matrix A:\n', A, '\nMatrix B:\n', B)
     A             = zeroOrNegInMatrix(A)
     B             = zeroOrNegInMatrix(B)
-    b             = -np.ones([len(A)+len(B.T), 1]).astype(np.int64)
-    matrixZeroes1 = np.zeros([len(A),len(B.T[0])]).astype(np.int64)
-    matrixZeroes2 = np.zeros([len(B.T), len(A[0])]).astype(np.int64)
+    b             = -np.ones([len(A)+len(B.T), 1],dtype=object)
+    matrixZeroes1 = np.zeros([len(A),len(B.T[0])],dtype=object)
+    matrixZeroes2 = np.zeros([len(B.T), len(A[0])],dtype=object)
     firstRow      = np.concatenate((matrixZeroes1,A),axis=1)
     secondRow     = np.concatenate((B.T, matrixZeroes2),axis=1)
     C             = np.vstack((firstRow,secondRow))

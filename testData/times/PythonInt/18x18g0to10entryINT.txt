@@ -1,0 +1,2 @@
+4727.309seconds
+Average = 4727.309

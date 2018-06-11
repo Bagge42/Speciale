@@ -1,0 +1,6 @@
+850.562seconds
+839.228seconds
+860.648seconds
+874.622seconds
+884.584seconds
+Average = 861.9288
