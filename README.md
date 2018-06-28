@@ -7,8 +7,13 @@ Execute the method findProperEquilibrium on the two payoff matrices.
 
 Example:
 $ ipython
+
 In [1]: import numpy as np
+
 In [2]: import specialePythonInt
+
 In [3]: A=np.array(([1,2],[2,5]))
+
 In [4]: B=np.array(([0,1],[0,2]))
+
 In [5]: print(specialePythonInt.findProperEquilibrium(A,B))
